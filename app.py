@@ -1,6 +1,8 @@
 import streamlit as st
 import os, requests
 
+base_url = "http://localhost:5000"
+
 # WEB PAGE CONFIGURATION
 st.set_page_config(page_title="Codebase RAG Chatbot")
 
@@ -12,13 +14,13 @@ if 'repo_url' not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-## RESPONSE GENERATIONq
+## RESPONSE GENERATION
 def get_response(query):
     data = {
         "query" : query,
         "repo_url" : st.session_state.repo_url
     }
-    response = requests.get("http://localhost:5000/query", json=data)
+    response = requests.get(f"{base_url}/query", json=data)
     if response.status_code == 200:
        try:
            response_data = response.json()
@@ -35,16 +37,15 @@ def on_repo_url_change():
     repo_url = st.session_state.repo_url = st.session_state.repo_url
     
     if repo_url:
-        url = f'http://127.0.0.1:5000/embed-repo'  # URL format
-
         data = {
             "repo_url": st.session_state.repo_url 
         }
 
         # Send a POST request with JSON data
-        response = requests.post(url, json=data)
-
-        print(response.text)
+        response = requests.post(f"{base_url}/embed-repo", json=data)
+        
+        st.session_state.messages = []
+        
         print(str(response))
             
 # WEB PAGE UI
@@ -62,7 +63,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("What is up?"):
+if prompt := st.chat_input("Can you explain the functionality of this codebase?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
