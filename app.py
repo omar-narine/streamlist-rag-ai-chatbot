@@ -1,15 +1,18 @@
 import streamlit as st
 import os, requests
 
-st.title("ChatGPT-like clone")
+# WEB PAGE CONFIGURATION
+st.set_page_config(page_title="Codebase RAG Chatbot")
+
+st.title("Codebase RAG Chatbot")
 
 if 'repo_url' not in st.session_state:
-    st.session_state.repo_url = "https://github.com/omar-narine/codebase-rag-api"
-
+    st.session_state.repo_url = "https://github.com/CoderAgent/SecureAgent"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+## RESPONSE GENERATIONq
 def get_response(query):
     data = {
         "query" : query,
@@ -26,7 +29,8 @@ def get_response(query):
     else:
        print(f"Request failed with status code {response.status_code}")
        return None
-   
+
+## REPO UPDATING
 def on_repo_url_change():
     repo_url = st.session_state.repo_url = st.session_state.repo_url
     
@@ -43,10 +47,12 @@ def on_repo_url_change():
         print(response.text)
         print(str(response))
             
+# WEB PAGE UI
+st.markdown("### GitHub Repository")
     
 st.text_input(
     label = "Enter a GitHub repository URL to chat with!",
-    value="https://github.com/omar-narine/codebase-rag-api",
+    value=st.session_state.repo_url,
     disabled=False,
     key="repo_url",
     on_change=on_repo_url_change
@@ -61,6 +67,7 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        response = st.write(get_response(prompt))
+    response = get_response(prompt)
     st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        st.markdown(response)
